@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yılan Oyunu - Kalbime Giden Yol ❤️</title>
+  <style>
+    body{background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:sans-serif;margin:0}
+    canvas{border:2px solid #fff;margin-top:20px}
+    .kontrol{margin-top:20px;display:grid;grid-template-columns:60px 60px 60px;gap:10px}
+    .btn{background:#333;color:#fff;padding:15px;font-size:18px;text-align:center;border-radius:6px;user-select:none;cursor:pointer}
+    .btn:active{background:#555}
+  </style>
+</head>
+<body>
+
+<h1>Yılan Oyunu</h1>
+<canvas id="game" width="400" height="400"></canvas>
+
+<div class="kontrol">
+  <div></div>
+  <div class="btn" onclick="game.setDirection('up')">↑</div>
+  <div></div>
+  <div class="btn" onclick="game.setDirection('left')">←</div>
+  <div class="btn" onclick="game.setDirection('down')">↓</div>
+  <div class="btn" onclick="game.setDirection('right')">→</div>
+</div>
+
+<script>
+class SnakeGame{
+  constructor(){
+    this.canvas=document.getElementById('game');
+    this.ctx=this.canvas.getContext('2d');
+    document.addEventListener('keydown',this.onKeyPress.bind(this));
+  }
+  init(){
+    this.posX=this.posY=10;
+    this.appleX=this.appleY=5;
+    this.tail=5;
+    this.trail=[];
+    this.grid=this.count=20;
+    this.velX=this.velY=0;
+    this.timer=setInterval(this.loop.bind(this),1000/15);
+  }
+  reset(){clearInterval(this.timer);this.init();}
+  loop(){this.update();this.draw();}
+  update(){
+    this.posX+=this.velX;this.posY+=this.velY;
+    if(this.posX<0)this.posX=this.count-1;
+    else if(this.posX>=this.count)this.posX=0;
+    if(this.posY<0)this.posY=this.count-1;
+    else if(this.posY>=this.count)this.posY=0;
+    for(let t of this.trail)if(t.x===this.posX&&t.y===this.posY){this.reset();return;}
+    this.trail.push({x:this.posX,y:this.posY});
+    while(this.trail.length>this.tail)this.trail.shift();
+    
+    if(this.appleX===this.posX&&this.appleY===this.posY){
+      this.tail++;
+      this.appleX=Math.floor(Math.random()*this.count);
+      this.appleY=Math.floor(Math.random()*this.count);
+      alert("Kalbimi kazandın! ❤");
+    }
+  }
+  draw(){
+    this.ctx.fillStyle='black';
+    this.ctx.fillRect(0,0,400,400);
+    
+    // Skor yazısı sağa kaydırıldı ve ortalandı
+    this.ctx.fillStyle='white';
+    this.ctx.font='20px Arial';
+    this.ctx.fillText('Skor: '+(this.tail-5), 300, 30);
+    
+    this.ctx.fillStyle='yellow';
+    for(let t of this.trail)this.ctx.fillRect(t.x*this.grid,t.y*this.grid,this.grid-5,this.grid-5);
+    
+    this.ctx.font = '22px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText('❤️', (this.appleX * this.grid) + (this.grid / 2), (this.appleY * this.grid) + (this.grid / 2));
+  }
+  onKeyPress(e){
+    switch(e.keyCode){
+      case 37:if(this.velX!==1){this.velX=-1;this.velY=0;}break;
+      case 38:if(this.velY!==1){this.velX=0;this.velY=-1;}break;
+      case 39:if(this.velX!==-1){this.velX=1;this.velY=0;}break;
+      case 40:if(this.velY!==-1){this.velX=0;this.velY=1;}break;
+    }
+  }
+  setDirection(d){
+    if(d==='left'&&this.velX!==1){this.velX=-1;this.velY=0;}
+    else if(d==='right'&&this.velX!==-1){this.velX=1;this.velY=0;}
+    else if(d==='up'&&this.velY!==1){this.velX=0;this.velY=-1;}
+    else if(d==='down'&&this.velY!==-1){this.velX=0;this.velY=1;}
+  }
+}
+var game=new SnakeGame();
+window.onload=()=>game.init();
+</script>
+
+</body>
+</html>
